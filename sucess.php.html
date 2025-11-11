@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color:  #c3cfe2;
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: #2a475e;
+            padding: 30px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <svg id="checkmark" width="100" height="100" style="margin: 20px auto; display: block;">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#4CAF50" stroke-width="4" 
+                    stroke-dasharray="283" stroke-dashoffset="283" stroke-opacity="0"/>
+            <path d="M30,50 l15,15 l25,-25" fill="none" stroke="#4CAF50" stroke-width="4" 
+                  stroke-dasharray="50" stroke-dashoffset="50" stroke-opacity="0"/>
+        </svg>
+
+
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase. Your payment has been processed successfully.</p>
+        <a href="home.php" class="btn btn-outline-primary">Back to Home</a>
+    </div>
+    <script>
+         const circle = document.querySelector('circle');
+        const check = document.querySelector('path');
+        circle.style.strokeOpacity = '0';
+        check.style.strokeOpacity = '0';
+        let circleOffset = 283;
+        const animateCircle = setInterval(() => {
+            circleOffset -= 5;
+            circle.style.strokeDashoffset = circleOffset;
+            circle.style.strokeOpacity = '1';
+            
+            if(circleOffset <= 0) {
+                clearInterval(animateCircle);
+                animateCheck();
+            }
+        }, 10);
+        function animateCheck() {
+            let checkOffset = 50;
+            const animate = setInterval(() => {
+                checkOffset -= 2;
+                check.style.strokeDashoffset = checkOffset;
+                check.style.strokeOpacity = '1';
+                if(checkOffset <= 0) clearInterval(animate);
+            }, 10);
+        }
+
+
+    </script>
+</body>
+
+</html>

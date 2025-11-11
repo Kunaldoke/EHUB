@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycle Centers Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 700px;
+            width: 100%;
+        }
+        .accuracy-circle {
+            stroke: #3388ff;
+            fill: #3388ff;
+            fill-opacity: 0.2;
+        }
+        #search-cnt{
+            display:none;
+        }
+    </style>
+</head>
+<body>
+    <?php include 'nav.php'; ?>
+    <div id="map"></div>
+
+    <script>
+        let map;
+        let userMarker;
+        let accuracyCircle;
+
+        function initMap() {
+            map = L.map('map').setView([0, 0], 14);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        const accuracy = position.coords.accuracy;
+
+                        console.log('Geolocation Accuracy:', accuracy + ' meters');
+
+                        
+                        map.setView([userLocation.lat, userLocation.lng], 14);
+
+                       
+                        if (userMarker) map.removeLayer(userMarker);
+                        if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+                       
+                        userMarker = L.marker([userLocation.lat, userLocation.lng])
+                            .addTo(map)
+                            .bindPopup(`Your Location (Accuracy: ${Math.round(accuracy)} meters)`)
+                            .openPopup();
+
+                        accuracyCircle = L.circle([userLocation.lat, userLocation.lng], {
+                            radius: accuracy,
+                            color: '#3388ff',
+                            fillOpacity: 0.1
+                        }).addTo(map);
+
+                        searchRecyclingCenters(userLocation);
+                    },
+                    (error) => {
+                        console.error("Geolocation Error:", error.message);
+                        handleLocationError(true);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                handleLocationError(false);
+            }
+        }
+
+        async function searchRecyclingCenters(location) {
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="recycling"](around:5000,${location.lat},${location.lng});node["amenity"="waste_disposal"](around:5000,${location.lat},${location.lng});node["amenity"="ewaste"](around:5000,${location.lat},${location.lng}););out;`;
+
+            try {
+                const response = await fetch(overpassUrl);
+                const data = await response.json();
+
+                if (data && data.elements) {
+                    data.elements.forEach(place => {
+                        L.marker([place.lat, place.lon])
+                            .addTo(map)
+                            .bindPopup(`
+                                <div>
+                                    <h5>${place.tags?.name || "Recycling Center"}</h5>
+                                    <p>Type: ${place.tags?.amenity || "Unknown"}</p>
+                                </div>
+                            `);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching recycling centers:', error);
+            }
+        }
+
+        function handleLocationError(browserHasGeolocation) {
+            const message = browserHasGeolocation
+                ? "Error: Please enable location permissions and try again."
+                : "Error: Geolocation is not supported by your browser.";
+            
+            L.popup()
+                .setLatLng(map.getCenter())
+                .setContent(message)
+                .openOn(map);
+        }
+
+        document.addEventListener("DOMContentLoaded", initMap);
+    </script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</body>
+</html>

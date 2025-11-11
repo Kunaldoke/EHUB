@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../LoginSignup"
+		},
+		{
+			"path": "../Doctor_Patient"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Doctor_Patient"
+	}
+}
